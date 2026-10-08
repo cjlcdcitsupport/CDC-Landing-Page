@@ -191,6 +191,17 @@ footer{background:#0d3f9a;border-top:0;color:#fff}
 .go svg{stroke:#fff;width:14px;height:14px;box-sizing:content-box;padding:5px;border-radius:50%;background:var(--red);transition:transform .3s,background .3s}
 .card:hover .go{background:var(--red);color:#fff;border-color:var(--red);box-shadow:0 6px 16px rgba(227,25,43,.3)}
 .card:hover .go svg{background:#fff;stroke:var(--red);transform:translateX(2px)}
+
+/* in-development state */
+.card.is-dev .status{color:#b26a00}
+.card.is-dev .status i{background:#ffb020;box-shadow:0 0 8px #ffb020}
+.card.is-dev .go{background:#fff7e6;color:#b26a00;border-color:#ffe0a3}
+.card.is-dev .go svg{background:#ffb020}
+.card.is-dev:hover .go{background:#ffb020;color:#fff;border-color:#ffb020;box-shadow:0 6px 16px rgba(255,176,32,.35)}
+.card.is-dev:hover .go svg{background:#fff;stroke:#ffb020}
+.ribbon{position:absolute;z-index:3;top:16px;right:-34px;transform:rotate(35deg);background:linear-gradient(90deg,#ffb020,#ffd21f);color:#5a3a00;font-size:11px;font-weight:600;letter-spacing:.5px;padding:3px 40px;box-shadow:0 3px 8px rgba(0,0,0,.18);pointer-events:none}
+.card{overflow:hidden}
+.card.is-dev .ctop .cat{margin-right:26px}
 </style>
 </head>
 <body>
@@ -246,6 +257,7 @@ footer{background:#0d3f9a;border-top:0;color:#fff}
    เพิ่ม/แก้ระบบ: แก้เฉพาะ APPS และ CATEGORIES ด้านล่าง
    icon ที่มี: ticket, truck, box, chart, users, printer, shield, laptop
    color: [สีเริ่ม, สีปลาย] ของไอคอน
+   status: 'live' = พร้อมใช้งาน | 'dev' = อยู่ระหว่างพัฒนา
    ===================================================== */
 const CATEGORIES = {
   it:  { th: 'IT Support', en: 'IT Support' },
@@ -254,13 +266,13 @@ const CATEGORIES = {
 
 const APPS = [
   {
-    cat: 'it', icon: 'ticket', color: ['#1556d6','#3fb6ff'],
+    cat: 'it', icon: 'ticket', color: ['#1556d6','#3fb6ff'], status: 'live',
     url: 'https://berstream.github.io/CDC-TicketSystems/Ticket.html',
     name: { th: 'CDC Ticket System', en: 'CDC Ticket System' },
     desc: { th: 'แจ้งปัญหาและติดตามงาน IT แจ้งซ่อมอุปกรณ์ ขอความช่วยเหลือจากทีม IT', en: 'Report IT issues, request repairs and track the status of your tickets.' },
   },
   {
-    cat: 'ops', icon: 'truck', color: ['#ff3b4f','#ff8a5b'],
+    cat: 'ops', icon: 'truck', color: ['#ff3b4f','#ff8a5b'], status: 'dev',
     url: 'https://cdc-container-loading-15151.web.app/',
     name: { th: 'CDC Container Loading', en: 'CDC Container Loading' },
     desc: { th: 'บันทึกและติดตามการโหลดตู้คอนเทนเนอร์ประจำวันของ CDC', en: 'Record and track daily container loading at CDC.' },
@@ -270,11 +282,11 @@ const APPS = [
 /* ===== i18n ===== */
 const T = {
   th:{pill:'ศูนย์รวมระบบงาน IT', h1a:'ศูนย์รวมแอปพลิเคชัน', sub:'รวมทุกระบบที่ทีม IT พัฒนาไว้สำหรับ CDC เข้าใช้งานได้ง่ายในที่เดียว',
-      search:'ค้นหาระบบ...', all:'ทั้งหมด', open:'เปิดใช้งาน', online:'พร้อมใช้งาน', empty:'ไม่พบระบบที่ค้นหา',
+      search:'ค้นหาระบบ...', all:'ทั้งหมด', open:'เปิดใช้งาน', online:'พร้อมใช้งาน', dev:'อยู่ระหว่างพัฒนา', try:'ทดลองใช้', beta:'กำลังพัฒนา', empty:'ไม่พบระบบที่ค้นหา',
       ask:'หากมีข้อสงสัยเพิ่มเติม ติดต่อ', tel:'โทร.', mail:'อีเมล',
       days:['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์'], loc:'th-TH'},
   en:{pill:'IT Application Center', h1a:'Application Hub', sub:'All the systems built by the IT team for CDC — in one place, one click away.',
-      search:'Search systems...', all:'All', open:'Open', online:'Online', empty:'No matching system found',
+      search:'Search systems...', all:'All', open:'Open', online:'Online', dev:'In development', try:'Preview', beta:'BETA', empty:'No matching system found',
       ask:'Need help? Contact', tel:'Tel.', mail:'Email',
       days:['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'], loc:'en-GB'},
 };
@@ -317,7 +329,7 @@ function renderCards(){
     (curCat === 'all' || a.cat === curCat) &&
     (!kw || [a.name.th, a.name.en, a.desc.th, a.desc.en, CATEGORIES[a.cat]?.[lang]].join(' ').toLowerCase().includes(kw)));
   $('#cards').innerHTML = items.map((a,i) => `
-    <a class="card" href="${a.url}" target="_blank" rel="noopener" style="animation-delay:${i*90}ms">
+    <a class="card ${a.status==='dev'?'is-dev':''}" href="${a.url}" target="_blank" rel="noopener" style="animation-delay:${i*90}ms">${a.status==='dev'?`<span class="ribbon">${T[lang].beta}</span>`:''}
       <div class="inner"><span class="shine"></span>
         <div class="ctop">
           <div class="icon" style="background:linear-gradient(135deg,${a.color[0]},${a.color[1]})"><svg viewBox="0 0 24 24">${ICONS[a.icon]||ICONS.laptop}</svg></div>
@@ -327,8 +339,8 @@ function renderCards(){
         <div class="body">
           <p>${a.desc[lang]}</p>
           <div class="cfoot">
-            <span class="status"><i></i>${T[lang].online}</span>
-            <span class="go">${T[lang].open}<svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+            <span class="status"><i></i>${a.status==='dev'?T[lang].dev:T[lang].online}</span>
+            <span class="go">${a.status==='dev'?T[lang].try:T[lang].open}<svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
           </div>
         </div>
       </div>
